@@ -21,14 +21,30 @@ void draw(){
   findLargestWhiteSpace();
 }
 
+int COUNT = 0;
+int MIN_X = 1;
+int MIN_Y = 2;
+int MAX_X = 3;
+int MAX_Y = 4;
 void findLargestWhiteSpace(){
   loadPixels();
   int[] indices = new int[pixels.length];
-  int[] counts = new int[pixels.length];
+  int[][] data = new int[pixels.length][5];
   color white = color(255,255,255);
+  int currX = 0;
+  int currY = 0;
   for(int i = 0; i < pixels.length; i++){
     indices[i] = pixels[i] == white ? i : -1;
-    counts[i] = pixels[i] == white ? 1 : 0;
+    data[i][COUNT] = pixels[i] == white ? 1 : 0;
+    data[i][MIN_X] = currX;
+    data[i][MIN_Y] = currY;
+    data[i][MAX_X] = currX;
+    data[i][MAX_Y] = currY;
+    currX++;
+    if (currX >= width){
+      currX = 0;
+      currY++;
+    }
   }
   
   boolean changed = false;
@@ -60,14 +76,14 @@ void findLargestWhiteSpace(){
         continue;
       }
       int checkAgainst = i-width;
-      changed |= handleComparison(indices, counts, onTop, i, i-width);
-      changed |= handleComparison(indices, counts, onRight, i, i + 1);
-      changed |= handleComparison(indices, counts, onBottom, i, i+width);
-      changed |= handleComparison(indices, counts, onLeft, i, i - 1);
+      changed |= handleComparison(indices, data, onTop, i, i-width);
+      changed |= handleComparison(indices, data, onRight, i, i + 1);
+      changed |= handleComparison(indices, data, onBottom, i, i+width);
+      changed |= handleComparison(indices, data, onLeft, i, i - 1);
     }
   }while(changed);
   
-  int[] sortedIndices = getSortedIndices(counts);
+  int[] sortedIndices = getSortedIndices(data);
   
   for(int i = 0; i < pixels.length; i++){
     if (indices[i] == sortedIndices[0]){
@@ -76,41 +92,51 @@ void findLargestWhiteSpace(){
   }
   
   updatePixels();
+  
+  fill(255,100,0);
+  ellipse(data[sortedIndices[0]][MIN_X],data[sortedIndices[0]][MIN_Y],5,5);
+  ellipse(data[sortedIndices[0]][MAX_X],data[sortedIndices[0]][MAX_Y],5,5);
+  fill(255);
+  ellipse((data[sortedIndices[0]][MAX_X]-data[sortedIndices[0]][MIN_X])/2+data[sortedIndices[0]][MIN_X],(data[sortedIndices[0]][MAX_Y]-data[sortedIndices[0]][MIN_Y])/2+data[sortedIndices[0]][MIN_Y],5,5);
 }
 
-int[] getSortedIndices(int[] counts){
+int[] getSortedIndices(int[][] data){
   ArrayList<Integer> sorted = new ArrayList<Integer>();
   int lastMaxValue = -1;
   int currMaxValue = 0;
   int currMaxIndex = 0;
   do{
     currMaxValue = 0;
-    for(int i = 0; i < counts.length; i++){
-      if (counts[i] > currMaxValue && (lastMaxValue < 0 || lastMaxValue > counts[i])){
+    for(int i = 0; i < data.length; i++){
+      if (data[i][COUNT] > currMaxValue && (lastMaxValue < 0 || lastMaxValue > data[i][COUNT])){
         currMaxIndex = i;
-        currMaxValue = counts[i];
+        currMaxValue = data[i][COUNT];
       }
     }
     if (currMaxValue == 0){
       break;
     }
     sorted.add(currMaxIndex);
-    lastMaxValue = counts[currMaxIndex];
+    lastMaxValue = data[currMaxIndex][COUNT];
   }while(lastMaxValue > 0);
   
   int[] output = new int[sorted.size()];
   for(int i = 0; i < sorted.size(); i++){
     output[i] = sorted.get(i);
-    println(counts[output[i]]);
+    println(data[output[i]][COUNT]);
   }
   return output;
 }
 
-boolean handleComparison(int[] indices, int[] counts, boolean onSide, int index, int checkAgainst){
+boolean handleComparison(int[] indices, int[][] data, boolean onSide, int index, int checkAgainst){
   if (!onSide && indices[index] < indices[checkAgainst]){
-    counts[indices[checkAgainst]]--;
+    data[indices[index]][MIN_X] = min(data[indices[checkAgainst]][MIN_X], data[indices[index]][MIN_X]);
+    data[indices[index]][MIN_Y] = min(data[indices[checkAgainst]][MIN_Y], data[indices[index]][MIN_Y]);
+    data[indices[index]][MAX_X] = max(data[indices[checkAgainst]][MAX_X], data[indices[index]][MAX_X]);
+    data[indices[index]][MAX_Y] = max(data[indices[checkAgainst]][MAX_Y], data[indices[index]][MAX_Y]);
+    data[indices[checkAgainst]][COUNT]--;
     indices[checkAgainst] = indices[index];
-    counts[indices[checkAgainst]]++;
+    data[indices[checkAgainst]][COUNT]++;
     return true;
   }
   return false;
