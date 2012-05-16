@@ -9,7 +9,7 @@ void setup(){
 void draw(){
   background(255);
   stroke(0);
-  drawFracturedLine(8,true);
+  drawFracturedLine(3,true);
 }
 
 void drawFracturedLine(int lineWidth, boolean first){
@@ -49,6 +49,6 @@ void findStartPoint(){
     startX = modelX(0,0,0);
     startY = modelY(0,0,0);
     ratioLimit = startRatio;
-  }while(startX > 0 && startX < width && startY > 0 && startY < height);
+  }while(startX < 0 || startX > width || startY < 0 || startY > height);
 }
   
