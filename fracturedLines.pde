@@ -1,7 +1,8 @@
 float diag;
+color[] colors = new color[]{color(0,0,0),color(0,0,0),color(255,100,100),color(100,255,100),color(100,100,255),color(255,255,0),color(0,255,255),color(255,0,255)};
 
 void setup(){
-  size(400,400,P3D);
+  size(400,600,P3D);
   diag = sqrt(width*width+height*height);
   noLoop();
 }
@@ -9,32 +10,42 @@ void setup(){
 void draw(){
   background(255);
   stroke(0);
-  drawFracturedLine(3,true);
+  smooth();
+  fill(248);
+  pushMatrix();
+    translate(width-250, 70);
+    scale(8);
+    text("QUIN");
+  popMatrix();
+  drawFracturedLine(7,true);
 }
 
 void drawFracturedLine(int lineWidth, boolean first){
   float angle = first ? random(PI,TWO_PI) : random(TWO_PI);
   float ratioLimit = 1.0;
   float startX, startY;
-  strokeWeight(lineWidth);
+  color myColor = colors[(int)random(colors.length)];
   pushMatrix();
     findStartPoint();
     rotate(angle);
-    line(0,0,0,diag);
-    if (lineWidth > 1){
-      drawFracturedLine(lineWidth - 1, false);
+    if (lineWidth > 2){
+      drawFracturedLine(lineWidth - 2, false);
     }
+    stroke(myColor);
+    strokeWeight(lineWidth);
+    line(0,0,0,diag);
   popMatrix();
   if (!first){
-    strokeWeight(lineWidth);
     angle += PI;
     pushMatrix();
       findStartPoint();
       rotate(angle);
-      line(0,0,0,diag);
-      if (lineWidth > 1){
-        drawFracturedLine(lineWidth - 1, false);
+      if (lineWidth > 2){
+        drawFracturedLine(lineWidth - 2, false);
       }
+      stroke(myColor);
+      strokeWeight(lineWidth);
+      line(0,0,0,diag);
     popMatrix();
   }
 }
