@@ -26,10 +26,13 @@ int MIN_X = 1;
 int MIN_Y = 2;
 int MAX_X = 3;
 int MAX_Y = 4;
+int SUM_X = 0;
+int SUM_Y = 1;
 void findLargestWhiteSpace(){
   loadPixels();
   int[] indices = new int[pixels.length];
   int[][] data = new int[pixels.length][5];
+  double[][] data2 = new double[pixels.length][2];
   color white = color(255,255,255);
   int currX = 0;
   int currY = 0;
@@ -40,6 +43,8 @@ void findLargestWhiteSpace(){
     data[i][MIN_Y] = currY;
     data[i][MAX_X] = currX;
     data[i][MAX_Y] = currY;
+    data2[i][SUM_X] = currX;
+    data2[i][SUM_Y] = currY;
     currX++;
     if (currX >= width){
       currX = 0;
@@ -76,10 +81,10 @@ void findLargestWhiteSpace(){
         continue;
       }
       int checkAgainst = i-width;
-      changed |= handleComparison(indices, data, onTop, i, i-width);
-      changed |= handleComparison(indices, data, onRight, i, i + 1);
-      changed |= handleComparison(indices, data, onBottom, i, i+width);
-      changed |= handleComparison(indices, data, onLeft, i, i - 1);
+      changed |= handleComparison(indices, data, data2, onTop, i, i-width);
+      changed |= handleComparison(indices, data, data2, onRight, i, i + 1);
+      changed |= handleComparison(indices, data, data2, onBottom, i, i+width);
+      changed |= handleComparison(indices, data, data2, onLeft, i, i - 1);
     }
   }while(changed);
   
@@ -98,6 +103,7 @@ void findLargestWhiteSpace(){
   ellipse(data[sortedIndices[0]][MAX_X],data[sortedIndices[0]][MAX_Y],5,5);
   fill(255);
   ellipse((data[sortedIndices[0]][MAX_X]-data[sortedIndices[0]][MIN_X])/2+data[sortedIndices[0]][MIN_X],(data[sortedIndices[0]][MAX_Y]-data[sortedIndices[0]][MIN_Y])/2+data[sortedIndices[0]][MIN_Y],5,5);
+  ellipse((int)(data2[sortedIndices[0]][SUM_X]/data[sortedIndices[0]][COUNT]),(int)(data2[sortedIndices[0]][SUM_Y]/data[sortedIndices[0]][COUNT]),10,10);
 }
 
 int[] getSortedIndices(int[][] data){
@@ -128,12 +134,21 @@ int[] getSortedIndices(int[][] data){
   return output;
 }
 
-boolean handleComparison(int[] indices, int[][] data, boolean onSide, int index, int checkAgainst){
+int[] indexToVertex(int index){
+  return new int[]{index % width, index / width};
+}
+
+boolean handleComparison(int[] indices, int[][] data, double[][] data2, boolean onSide, int index, int checkAgainst){
   if (!onSide && indices[index] < indices[checkAgainst]){
     data[indices[index]][MIN_X] = min(data[indices[checkAgainst]][MIN_X], data[indices[index]][MIN_X]);
     data[indices[index]][MIN_Y] = min(data[indices[checkAgainst]][MIN_Y], data[indices[index]][MIN_Y]);
     data[indices[index]][MAX_X] = max(data[indices[checkAgainst]][MAX_X], data[indices[index]][MAX_X]);
     data[indices[index]][MAX_Y] = max(data[indices[checkAgainst]][MAX_Y], data[indices[index]][MAX_Y]);
+    int[] checkAgainstVertex = indexToVertex(checkAgainst);
+    data2[indices[index]][SUM_X] += checkAgainstVertex[0];
+    data2[indices[index]][SUM_Y] += checkAgainstVertex[1];
+    data2[indices[checkAgainst]][SUM_X] -= checkAgainstVertex[0];
+    data2[indices[checkAgainst]][SUM_Y] -= checkAgainstVertex[1];
     data[indices[checkAgainst]][COUNT]--;
     indices[checkAgainst] = indices[index];
     data[indices[checkAgainst]][COUNT]++;
