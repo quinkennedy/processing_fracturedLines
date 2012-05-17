@@ -4,7 +4,7 @@ PGraphics test;
 static float BUSINESS_CARD_LONG = 2.8;
 static float BUSINESS_CARD_SHORT = 1.75;
 static int PPI_ACTUAL = 200;
-static int PPI_TEST = 200;
+static int PPI_TEST = 50;
 static int START_WIDTH_ACTUAL = 14;
 static int STEP_SIZE_ACTUAL = 4;
 static float TEST_RATIO = ((float)PPI_TEST) / PPI_ACTUAL;
@@ -40,7 +40,7 @@ void draw(){
   test.endDraw();
   //image(test,0,0,100,100);
   findLargeWhiteSpaces();
-  image(test,0,0);
+  image(test,0,0,width, height);
 }
 
 int COUNT = 0;
@@ -118,13 +118,13 @@ int[][] findLargeWhiteSpaces(){
   int[] sortedIndices = getSortedIndices(data);
   int[][] output = new int[sortedIndices.length][data[0].length];
   
-//  for(int i = 0; i < test.pixels.length; i++){
-//    if (indices[i] == sortedIndices[0]){
-//      test.pixels[i] = indices[i];
-//    }
-//  }
-//  
-//  test.updatePixels();
+  for(int i = 0; i < test.pixels.length; i++){
+    if (indices[i] == sortedIndices[0]){
+      test.pixels[i] = indices[i];
+    }
+  }
+  
+  test.updatePixels();
   for(int i = 0; i < sortedIndices.length; i++){
     for(int j = 0; j < data[0].length; j++){
       output[i][j] = data[sortedIndices[i]][j];
