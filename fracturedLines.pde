@@ -1,3 +1,4 @@
+String[] pieces = new String[]{"quinkennedy@gmail.com","quinkennedy.com","coding&stuff"};
 float diag;
 color[] colors = new color[]{color(0,0,0),color(0,0,0),color(255,100,100),color(100,255,100),color(100,100,255),color(255,255,0),color(0,255,255),color(255,0,255)};
 PGraphics test;
@@ -38,9 +39,15 @@ void draw(){
   test.popMatrix();
   drawFracturedLine(7,true);
   test.endDraw();
-  //image(test,0,0,100,100);
-  findLargeWhiteSpaces();
-  image(test,0,0,width, height);
+  int[][] result = findLargeWhiteSpaces();
+  
+  textAlign(CENTER);
+  stroke(0);
+  fill(0);
+  for(int i = 0; i < pieces.length && i < result.length; i++){
+    text(pieces[i], result[i][COG_X]/TEST_RATIO,result[i][COG_Y]/TEST_RATIO);
+  }
+  //image(test,0,0,width, height);
 }
 
 int COUNT = 0;
@@ -118,27 +125,27 @@ int[][] findLargeWhiteSpaces(){
   int[] sortedIndices = getSortedIndices(data);
   int[][] output = new int[sortedIndices.length][data[0].length];
   
-  for(int i = 0; i < test.pixels.length; i++){
-    if (indices[i] == sortedIndices[0]){
-      test.pixels[i] = indices[i];
-    }
-  }
-  
-  test.updatePixels();
+//  for(int i = 0; i < test.pixels.length; i++){
+//    if (indices[i] == sortedIndices[0]){
+//      test.pixels[i] = indices[i];
+//    }
+//  }
+//  
+//  test.updatePixels();
   for(int i = 0; i < sortedIndices.length; i++){
     for(int j = 0; j < data[0].length; j++){
       output[i][j] = data[sortedIndices[i]][j];
     }
   }
   
-  fill(255,100,0);
-  ellipse(output[0][MIN_X]/TEST_RATIO,output[0][MIN_Y]/TEST_RATIO,5,5);
-  ellipse(output[0][MAX_X]/TEST_RATIO,output[0][MAX_Y]/TEST_RATIO,5,5);
-  fill(255);
-  ellipse(((output[0][MAX_X]-output[0][MIN_X])/2+output[0][MIN_X])/TEST_RATIO,((output[0][MAX_Y]-output[0][MIN_Y])/2+output[0][MIN_Y])/TEST_RATIO,5,5);
-  //stroke(0);
-  fill(0);
-  ellipse(output[0][COG_X]/TEST_RATIO,output[0][COG_Y]/TEST_RATIO,5,5);
+//  fill(255,100,0);
+//  ellipse(output[0][MIN_X]/TEST_RATIO,output[0][MIN_Y]/TEST_RATIO,5,5);
+//  ellipse(output[0][MAX_X]/TEST_RATIO,output[0][MAX_Y]/TEST_RATIO,5,5);
+//  fill(255);
+//  ellipse(((output[0][MAX_X]-output[0][MIN_X])/2+output[0][MIN_X])/TEST_RATIO,((output[0][MAX_Y]-output[0][MIN_Y])/2+output[0][MIN_Y])/TEST_RATIO,5,5);
+//  //stroke(0);
+//  fill(0);
+//  ellipse(output[0][COG_X]/TEST_RATIO,output[0][COG_Y]/TEST_RATIO,5,5);
   return output;
 }
 
