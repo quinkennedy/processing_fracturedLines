@@ -45,7 +45,11 @@ void draw(){
   stroke(0);
   fill(0);
   for(int i = 0; i < pieces.length && i < result.length; i++){
-    text(pieces[i], result[i][COG_X]/TEST_RATIO,result[i][COG_Y]/TEST_RATIO);
+    pushMatrix();
+      translate(result[i][COG_X]/TEST_RATIO,result[i][COG_Y]/TEST_RATIO);
+      rotate(result[i][MAX_X] - result[i][MIN_X] < result[i][MAX_Y] - result[i][MIN_Y] ? (random(2) < 1 ? PI/2 : PI*3/2) : (random(2) < 1 ? 0 : PI));
+      text(pieces[i],0,0);
+    popMatrix();
   }
   //image(test,0,0,width, height);
 }
