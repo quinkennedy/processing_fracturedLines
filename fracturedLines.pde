@@ -1,57 +1,137 @@
-String[] pieces = new String[]{"quinkennedy@gmail.com","quinkennedy.com","coding&stuff"};
+import processing.pdf.*;
+
+String[] pieces = new String[]{
+"Judy Kennedy",
+"Neighborhood & Arts",
+"(707)528-0736",
+"quinkenn@sonic.net"};
 float diag;
-color[] colors = new color[]{color(0,0,0),color(0,0,0),color(255,100,100),color(100,255,100),color(100,100,255),color(255,255,0),color(0,255,255),color(255,0,255)};
+color[] colors = new color[]{color(0), color(255), color(255,0,255)};
+//new color[]{color(0,0,0),color(0,0,0,100),color(0,0,0,200),color(255),color(255,255,255,100), color(255,255,255,200)};
+//new color[]{color(0,0,0),color(0,0,0),color(255,100,100),color(100,255,100),color(100,100,255),color(255,255,0),color(0,255,255),color(255,0,255)};
 PGraphics test;
-static float BUSINESS_CARD_LONG = 2.8;
-static float BUSINESS_CARD_SHORT = 1.75;
-static int PPI_ACTUAL = 200;
-static int PPI_TEST = 50;
-static int START_WIDTH_ACTUAL = 14;
-static int STEP_SIZE_ACTUAL = 4;
-static float TEST_RATIO = ((float)PPI_TEST) / PPI_ACTUAL;
+static float BUSINESS_CARD_LONG = 3.5;
+static float BUSINESS_CARD_SHORT = 2;
+static int PPI_VIEW = 113;//200;//113
+static int PPI_TEST = 50;//200;
+static int PPI_PDF = 300;
+static int START_WIDTH_ACTUAL = 7;
+static int STEP_SIZE_ACTUAL = 2;
+static float TEST_RATIO = ((float)PPI_TEST) / PPI_VIEW;
+static float PDF_RATIO = ((float)PPI_PDF) / PPI_VIEW;
+PImage imgBack;
+static int TEXT_SIZE = 12;
+static int TEXT_V_SPACING = 4;
+color headerColor = color(255,255,255,50);//,150,20);//248
+color textColor = color(255);
+PGraphicsPDF pdf;
 
 void setup(){
-  size((int)(PPI_ACTUAL * BUSINESS_CARD_SHORT),(int)(PPI_ACTUAL * BUSINESS_CARD_LONG),JAVA2D);
-  strokeCap(ROUND);
+  size((int)(PPI_VIEW * BUSINESS_CARD_SHORT),(int)(PPI_VIEW * BUSINESS_CARD_LONG),JAVA2D);
   test = createGraphics((int)(PPI_TEST * BUSINESS_CARD_SHORT),(int)(PPI_TEST * BUSINESS_CARD_LONG),P3D);
+  pdf = (PGraphicsPDF)createGraphics((int)(300*BUSINESS_CARD_SHORT),(int)(300*BUSINESS_CARD_LONG),PDF,"output.pdf");
+  strokeCap(ROUND);
+  //pdf.strokeCap(ROUND);
   diag = sqrt(width*width+height*height);
+  loadBackgroundImg();
+  imgBack = loadImage("background.jpg");
+  //textSize(TEXT_SIZE);
   noLoop();
+}
+
+void loadBackgroundImg(){
+  
 }
 
 void draw(){
   test.beginDraw();
-  background(255);
+  pdf.beginDraw();
+  //background(255);
+  float imgBackRatio = PPI_VIEW/350.0f;
+  int imgBackYOffset = -(int)random(imgBack.height*imgBackRatio-height);
+  image(imgBack, 0, imgBackYOffset, imgBackRatio*imgBack.width, imgBackRatio*imgBack.height);
+//  background(imgBack);
   test.background(255);
-  stroke(0);
-  test.stroke(0);
+  pdf.image(imgBack, 0, imgBackYOffset*PDF_RATIO, 
+    imgBackRatio*imgBack.width*PDF_RATIO, 
+    imgBackRatio*imgBack.height*PDF_RATIO);
   smooth();
-  fill(248);
-  test.fill(248);
+  pdf.smooth();
+  fill(headerColor);
+  pdf.fill(headerColor);
   pushMatrix();
-  test.pushMatrix();
-    translate(width-250, 70);
-    test.translate(test.width-((int)(250*TEST_RATIO)), ((int)(70*TEST_RATIO)));
-    scale(8);
-    test.scale(((int)(8*TEST_RATIO)));
-    text("QUIN");
-    //test.text("QUIN");
+  pdf.pushMatrix();
+    translate(width-PPI_VIEW/*250*/, PPI_VIEW/3.0f/*70*/);
+    pdf.translate(pdf.width-((int)(PPI_VIEW*PDF_RATIO)),((int)(PPI_VIEW/3.0f*PDF_RATIO)));
+    scale(PPI_VIEW*8/200);
+    pdf.scale(((int)(PPI_VIEW*8/200*PDF_RATIO)));
+    text("JUDY");
+    pdf.text("JUDY");
   popMatrix();
-  test.popMatrix();
-  drawFracturedLine(7,true);
+  pdf.popMatrix();
+  drawFracturedLine(START_WIDTH_ACTUAL,true);
   test.endDraw();
   int[][] result = findLargeWhiteSpaces();
   
-  textAlign(CENTER);
-  stroke(0);
-  fill(0);
-  for(int i = 0; i < pieces.length && i < result.length; i++){
-    pushMatrix();
-      translate(result[i][COG_X]/TEST_RATIO,result[i][COG_Y]/TEST_RATIO);
-      rotate(result[i][MAX_X] - result[i][MIN_X] < result[i][MAX_Y] - result[i][MIN_Y] ? (random(2) < 1 ? PI/2 : PI*3/2) : (random(2) < 1 ? 0 : PI));
-      text(pieces[i],0,0);
-    popMatrix();
-  }
+  int[] textOffset = getTextOffset();
+  
+  textAlign(LEFT);
+  pdf.textAlign(LEFT);
+  fill(textColor);
+  pdf.fill(textColor);
+  textLeading(TEXT_SIZE + TEXT_V_SPACING);
+  String textLines = collectText();
+  pushMatrix();
+  pdf.pushMatrix();
+    float textTranslateX = result[0][COG_X]/TEST_RATIO+textOffset[0];
+    float textTranslateY = result[0][COG_Y]/TEST_RATIO+textOffset[1];
+    translate(textTranslateX,textTranslateY);
+    pdf.translate(textTranslateX*PDF_RATIO, textTranslateY*PDF_RATIO);
+    text(textLines, 0, 0);
+    pdf.text(textLines, 0, 0);
+  popMatrix();
+  pdf.popMatrix();
+//  for(int i = 0; i < pieces.length && i < result.length; i++){
+//    pushMatrix();
+//      translate(result[i][COG_X]/TEST_RATIO,result[i][COG_Y]/TEST_RATIO);
+//      //rotate(result[i][MAX_X] - result[i][MIN_X] < result[i][MAX_Y] - result[i][MIN_Y] ? (random(2) < 1 ? PI/2 : PI*3/2) : (random(2) < 1 ? 0 : PI));
+//      text(pieces[i],0,0);
+//    popMatrix();
+//  }
   //image(test,0,0,width, height);
+  pdf.dispose();
+  pdf.endDraw();
+}
+
+String collectText(){
+  String output = "";
+  for(int i = 0; i < pieces.length; i++){
+    output += pieces[i] + (i == pieces.length - 1 ? "" : "\n");
+  }
+  return output;
+}
+
+int TEXT_MIN_X = 0;
+int TEXT_MIN_Y = 1;
+int TEXT_WIDTH = 2;
+int TEXT_HEIGHT = 3;
+int[] getTextOffset(){
+  int widthSum = 0;
+  int maxWidth = 0;
+  int currWidth;
+  for(int i = 0; i < pieces.length; i++){
+    currWidth = textWidth(pieces[i]);
+    widthSum += currWidth;
+    if (currWidth > maxWidth){
+      maxWidth = currWidth;
+    }
+  }
+  int allTextHeight = (TEXT_SIZE + TEXT_V_SPACING)*pieces.length;
+  return new int[]{
+    -widthSum/pieces.length/2, 
+    -allTextHeight/2,
+    maxWidth,
+    allTextHeight};
 }
 
 int COUNT = 0;
@@ -210,38 +290,52 @@ void drawFracturedLine(int lineWidth, boolean first){
   float ratioLimit = 1.0;
   float startX, startY;
   color myColor = colors[(int)random(colors.length)];
+  int myAlpha = 255*lineWidth/START_WIDTH_ACTUAL;
+  //myColor = (myColor & 0x00FFFFFF) | (myAlpha << 24);
   pushMatrix();
   test.pushMatrix();
+  pdf.pushMatrix();
     findStartPoint();
     rotate(angle);
     test.rotate(angle);
+    pdf.rotate(angle);
     if (lineWidth > 2){
-      drawFracturedLine(lineWidth - 2, false);
+      drawFracturedLine(lineWidth - STEP_SIZE_ACTUAL, false);
     }
     stroke(myColor);
+    pdf.stroke(myColor);
     strokeWeight(lineWidth);
+    pdf.strokeWeight(lineWidth*PDF_RATIO);
     test.strokeWeight(lineWidth*TEST_RATIO);
     line(0,0,0,diag);
-    test.line(0,0,0,diag);
+    test.line(0,0,0,diag*TEST_RATIO);
+    pdf.line(0,0,0,diag*PDF_RATIO);
   popMatrix();
   test.popMatrix();
+  pdf.popMatrix();
   if (!first){
     angle += PI;
     pushMatrix();
     test.pushMatrix();
+    pdf.pushMatrix();
       findStartPoint();
       rotate(angle);
       test.rotate(angle);
+      pdf.rotate(angle);
       if (lineWidth > 2){
-        drawFracturedLine(lineWidth - 2, false);
+        drawFracturedLine(lineWidth - STEP_SIZE_ACTUAL, false);
       }
       stroke(myColor);
+      pdf.stroke(myColor);
       strokeWeight(lineWidth);
       test.strokeWeight(lineWidth*TEST_RATIO);
+      pdf.strokeWeight(lineWidth*PDF_RATIO);
       line(0,0,0,diag);
-      test.line(0,0,0,diag);
+      test.line(0,0,0,diag*TEST_RATIO);
+      pdf.line(0,0,0,diag*PDF_RATIO);
     popMatrix();
     test.popMatrix();
+    pdf.popMatrix();
   }
 }
 
@@ -257,5 +351,6 @@ void findStartPoint(){
     ratioLimit = startRatio;
   }while(startX < 0 || startX > test.width || startY < 0 || startY > test.height);
   translate(0,diag*startRatio/TEST_RATIO);
+  pdf.translate(0,diag*startRatio/TEST_RATIO*PDF_RATIO);
 }
   
