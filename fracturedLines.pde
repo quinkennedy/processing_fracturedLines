@@ -1,12 +1,12 @@
 import processing.pdf.*;
 
 String[] pieces = new String[]{
-"Judy Kennedy",
-"Neighborhood & Arts",
-"(707)528-0736",
-"quinkenn@sonic.net"};
+"quinkennedy@gmail.com",
+"coding&stuff",
+"quinkennedy.com"};
 float diag;
-color[] colors = new color[]{color(0), color(255), color(255,0,255)};
+//color[] colors = new color[]{color(0), color(255), color(255,0,255)};
+color[] colors = new color[]{color(0), color(255, 0, 255), color(255, 255, 0)};
 //new color[]{color(0,0,0),color(0,0,0,100),color(0,0,0,200),color(255),color(255,255,255,100), color(255,255,255,200)};
 //new color[]{color(0,0,0),color(0,0,0),color(255,100,100),color(100,255,100),color(100,100,255),color(255,255,0),color(0,255,255),color(255,0,255)};
 PGraphics test;
@@ -22,51 +22,92 @@ static float PDF_RATIO = ((float)PPI_PDF) / PPI_VIEW;
 PImage imgBack;
 static int TEXT_SIZE = 12;
 static int TEXT_V_SPACING = 4;
-color headerColor = color(255,255,255,50);//,150,20);//248
-color textColor = color(255);
+color headerColor = color(0, 0, 0, 50);// color(255,255,255,50);//,150,20);//248
+color textColor = color(0);
 PGraphicsPDF pdf;
 
 void setup(){
-  size((int)(PPI_VIEW * BUSINESS_CARD_SHORT),(int)(PPI_VIEW * BUSINESS_CARD_LONG),JAVA2D);
+  size((int)(PPI_VIEW * BUSINESS_CARD_SHORT),(int)(PPI_VIEW * BUSINESS_CARD_LONG),P2D);
   test = createGraphics((int)(PPI_TEST * BUSINESS_CARD_SHORT),(int)(PPI_TEST * BUSINESS_CARD_LONG),P3D);
   pdf = (PGraphicsPDF)createGraphics((int)(300*BUSINESS_CARD_SHORT),(int)(300*BUSINESS_CARD_LONG),PDF,"output.pdf");
   strokeCap(ROUND);
   //pdf.strokeCap(ROUND);
   diag = sqrt(width*width+height*height);
   loadBackgroundImg();
-  imgBack = loadImage("background.jpg");
+  //imgBack = loadImage("background.jpg");
   //textSize(TEXT_SIZE);
   noLoop();
 }
 
 void loadBackgroundImg(){
-  
+  String imgname = (int)random(15)+"-cropped.jpg";
+  println(imgname);
+  imgBack = loadImage(imgname);
+}
+
+void drawBackground(){
+  //background(255);
+  //float imgBackRatio = PPI_VIEW/350.0f;
+  //int imgBackYOffset = -(int)random(imgBack.height*imgBackRatio-height);
+  //image(imgBack, 0, imgBackYOffset, imgBackRatio*imgBack.width, imgBackRatio*imgBack.height);
+//  background(imgBack);
+  boolean bRotate = random(1) < .5;
+  int backgroundHeight = bRotate ? imgBack.width : imgBack.height;
+  int backgroundWidth = bRotate ? imgBack.height : imgBack.width;
+//  float minSize = ;
+//  float maxSize = ;
+//  float backgroundSize = random(minSize, maxSize);
+  test.background(255);
+  pdf.background(255);
+  return;/*
+  pdf.background(204);
+  pushMatrix();
+  pdf.pushMatrix();
+    translate(width/2, height/2);
+    pdf.translate(pdf.width/2, pdf.height/2);
+    if (bRotate){
+      rotate(PI/2);
+      pdf.rotate(PI/2);
+    }
+    imageMode(CENTER);
+    pdf.imageMode(CENTER);
+    float imgBackRatio = (float)max(height,width)/imgBack.width;
+    image(imgBack, 0, 0, imgBackRatio*imgBack.width, imgBackRatio*imgBack.height);
+    imgBackRatio *= PDF_RATIO;
+    pdf.image(imgBack, 0, 0, imgBackRatio*imgBack.width, imgBackRatio*imgBack.height);
+  popMatrix();
+  pdf.popMatrix();*/
+ // pdf.image(imgBack, 0, imgBackYOffset*PDF_RATIO, 
+ //   imgBackRatio*imgBack.width*PDF_RATIO, 
+ //   imgBackRatio*imgBack.height*PDF_RATIO);
 }
 
 void draw(){
   test.beginDraw();
   pdf.beginDraw();
-  //background(255);
-  float imgBackRatio = PPI_VIEW/350.0f;
-  int imgBackYOffset = -(int)random(imgBack.height*imgBackRatio-height);
-  image(imgBack, 0, imgBackYOffset, imgBackRatio*imgBack.width, imgBackRatio*imgBack.height);
-//  background(imgBack);
-  test.background(255);
-  pdf.image(imgBack, 0, imgBackYOffset*PDF_RATIO, 
-    imgBackRatio*imgBack.width*PDF_RATIO, 
-    imgBackRatio*imgBack.height*PDF_RATIO);
+  drawBackground();
   smooth();
   pdf.smooth();
   fill(headerColor);
   pdf.fill(headerColor);
   pushMatrix();
   pdf.pushMatrix();
-    translate(width-PPI_VIEW/*250*/, PPI_VIEW/3.0f/*70*/);
-    pdf.translate(pdf.width-((int)(PPI_VIEW*PDF_RATIO)),((int)(PPI_VIEW/3.0f*PDF_RATIO)));
+    translate(width-(PPI_VIEW-5)/*250*/, PPI_VIEW/3.3f/*70*/);
+    pdf.translate(pdf.width-((int)((PPI_VIEW-5)*PDF_RATIO)),((int)(PPI_VIEW/3.3f*PDF_RATIO)));
     scale(PPI_VIEW*8/200);
     pdf.scale(((int)(PPI_VIEW*8/200*PDF_RATIO)));
-    text("JUDY");
-    pdf.text("JUDY");
+    text("QUIN", 0, 0);
+    pdf.text("QUIN", 0, 0);
+  popMatrix();
+  pdf.popMatrix();
+  pushMatrix();
+  pdf.pushMatrix();
+    translate(-7, PPI_VIEW*(BUSINESS_CARD_LONG));
+    pdf.translate(-7*PDF_RATIO, (PPI_VIEW*(BUSINESS_CARD_LONG)*PDF_RATIO));
+    scale(PPI_VIEW*8/200);
+    pdf.scale(PPI_VIEW*8/200*PDF_RATIO);
+    text("KENNEDY", 0, 0);
+    pdf.text("KENNEDY", 0, 0);
   popMatrix();
   pdf.popMatrix();
   drawFracturedLine(START_WIDTH_ACTUAL,true);
@@ -82,6 +123,7 @@ void draw(){
   textLeading(TEXT_SIZE + TEXT_V_SPACING);
   String textLines = collectText();
   pushMatrix();
+  pdf.textSize(14*PDF_RATIO);
   pdf.pushMatrix();
     float textTranslateX = result[0][COG_X]/TEST_RATIO+textOffset[0];
     float textTranslateY = result[0][COG_Y]/TEST_RATIO+textOffset[1];
@@ -120,7 +162,7 @@ int[] getTextOffset(){
   int maxWidth = 0;
   int currWidth;
   for(int i = 0; i < pieces.length; i++){
-    currWidth = textWidth(pieces[i]);
+    currWidth = (int)textWidth(pieces[i]);
     widthSum += currWidth;
     if (currWidth > maxWidth){
       maxWidth = currWidth;
@@ -256,7 +298,7 @@ int[] getSortedIndices(int[][] data){
   int[] output = new int[sorted.size()];
   for(int i = 0; i < sorted.size(); i++){
     output[i] = sorted.get(i);
-    println(data[output[i]][COUNT]);
+    //println(data[output[i]][COUNT]);
   }
   return output;
 }
@@ -291,7 +333,7 @@ void drawFracturedLine(int lineWidth, boolean first){
   float startX, startY;
   color myColor = colors[(int)random(colors.length)];
   int myAlpha = 255*lineWidth/START_WIDTH_ACTUAL;
-  //myColor = (myColor & 0x00FFFFFF) | (myAlpha << 24);
+  myColor = (myColor & 0x00FFFFFF) | (myAlpha << 24);
   pushMatrix();
   test.pushMatrix();
   pdf.pushMatrix();
