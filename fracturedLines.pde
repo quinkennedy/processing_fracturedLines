@@ -121,6 +121,7 @@ void draw(){
   fill(textColor);
   pdf.fill(textColor);
   textLeading(TEXT_SIZE + TEXT_V_SPACING);
+  /*
   String textLines = collectText();
   pushMatrix();
   pdf.textSize(14*PDF_RATIO);
@@ -133,13 +134,28 @@ void draw(){
     pdf.text(textLines, 0, 0);
   popMatrix();
   pdf.popMatrix();
-//  for(int i = 0; i < pieces.length && i < result.length; i++){
-//    pushMatrix();
-//      translate(result[i][COG_X]/TEST_RATIO,result[i][COG_Y]/TEST_RATIO);
-//      //rotate(result[i][MAX_X] - result[i][MIN_X] < result[i][MAX_Y] - result[i][MIN_Y] ? (random(2) < 1 ? PI/2 : PI*3/2) : (random(2) < 1 ? 0 : PI));
-//      text(pieces[i],0,0);
-//    popMatrix();
-//  }
+  */
+  /**/
+  for(int i = 0; i < pieces.length && i < result.length; i++){
+    pushMatrix();
+    pdf.textSize(14*PDF_RATIO);
+    pdf.pushMatrix();
+      float left = result[i][COG_X]/TEST_RATIO;
+      //pdf.scale(PDF_RATIO);
+      translate(left,result[i][COG_Y]/TEST_RATIO);
+      pdf.translate((left)*PDF_RATIO,result[i][COG_Y]/TEST_RATIO*PDF_RATIO);
+      float r = result[i][MAX_X] - result[i][MIN_X] < result[i][MAX_Y] - result[i][MIN_Y] ? (random(2) < 1 ? PI/2 : PI*3/2) : (random(2) < 1 ? 0 : PI);
+      r = PI/2;
+      rotate(r);
+      pdf.rotate(r);
+      translate(-textWidth(pieces[i])/2, 0);
+      pdf.translate(-pdf.textWidth(pieces[i])/2, 0);
+      text(pieces[i],0,0);
+      pdf.text(pieces[i], 0, 0);
+    popMatrix();
+    pdf.popMatrix();
+  }
+/**/
   //image(test,0,0,width, height);
   pdf.dispose();
   pdf.endDraw();
